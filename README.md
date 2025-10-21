@@ -8,6 +8,8 @@ ghostty terminal
 waybar
 home-manager from nixos repository
 
+has nvidia graphics, ollama, docker, and ssh enabled
+
 to use this github repository, firstly
 copy your system's hardware configuration using
 cp /etc/nixos/hardware-configuration.nix ~/nixOS_config/
