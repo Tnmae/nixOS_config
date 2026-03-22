@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, pkgs, lib, ... }:
 
 {
   imports = [
@@ -52,26 +52,41 @@ hardware.bluetooth = {
   };
 };
 
-  users.users.Tnmae = {
-    isNormalUser = true;
-    extraGroups = [
-      "wheel"
-      "networkmanager"
-      "wireshark"
-      "docker"
-      "dialout"
-    ];
-    packages = with pkgs; [
-      chromium
-    ];
+
+  users = {
+    users.Tnmae = {
+      isNormalUser = true;
+      extraGroups = [
+        "wheel"
+        "networkmanager"
+        "wireshark"
+        "docker"
+        "dialout"
+        "libvirtd"
+        "kvm"
+      ];
+      packages = with pkgs; [
+        tree
+      ];
+    };
   };
+
+  documentation = {
+    dev.enable = true;
+    man.generateCaches = true;
+    nixos.includeAllModules = true;                                         
+  };
+
+  programs.dconf.enable = true;
+
+  virtualisation.spiceUSBRedirection.enable = true;
   
+  programs.firefox.enable = true;
 
   environment.systemPackages = with pkgs; [
     ffmpeg
     nvidia-vaapi-driver
     nvidia-modprobe
-    neovim
     usbutils
     wget
     wl-clipboard-rs
@@ -92,7 +107,7 @@ hardware.bluetooth = {
     adw-gtk3
     papirus-icon-theme
     nh
-    xfce.thunar
+    thunar
     gnumake
     go
     gcc
@@ -106,7 +121,7 @@ hardware.bluetooth = {
     docker-compose
     xdg-desktop-portal-wlr
     polkit
-    nixfmt-rfc-style
+    nixfmt
     obsidian
     nmap
     openvpn
@@ -143,11 +158,17 @@ hardware.bluetooth = {
     cava
     cmatrix
     peaclock
-    octave
-    arduino-ide
-    arduino-cli
     usbutils
     pciutils
+    unzip
+    qemu
+    ngrok
+    dnsmasq
+    man-pages
+    jetbrains.datagrip
+    bruno
+    nasm
+    v4l-utils
   ];
 
   hardware = {
@@ -155,6 +176,7 @@ hardware.bluetooth = {
     nvidia = {
       modesetting.enable = true;
       open = false;
+      package = config.boot.kernelPackages.nvidiaPackages.stable;
     };
   };
   services.xserver.videoDrivers = [ "nvidia" ];
@@ -164,8 +186,10 @@ hardware.bluetooth = {
     fontconfig.enable = true;
     packages = with pkgs; [
       nerd-fonts.jetbrains-mono
+      nerd-fonts.victor-mono
     ];
   };
+
   services = {
     displayManager.enable = true;
     displayManager.ly.enable = true;
@@ -178,6 +202,7 @@ hardware.bluetooth = {
     };
     openssh.enable = true;
   };
+
   programs = {
     niri.enable = true;
     xwayland.enable = true;
@@ -190,8 +215,18 @@ hardware.bluetooth = {
     };
     gamemode.enable = true;
   };
+
   security.polkit.enable = true;
   virtualisation.docker.enable = true;
+
+  virtualisation.libvirtd = {
+    enable = true;
+    qemu.vhostUserPackages = with pkgs; [ virtiofsd ];
+  };
+
+  programs.virt-manager.enable = true;
+
+  hardware.nvidia-container-toolkit.enable = true;
 
   environment.variables = {
     LD_LIBRARY_PATH = "/run/opengl-driver/lib";
@@ -205,14 +240,78 @@ hardware.bluetooth = {
     "flakes"
   ];
 
+
   services.ollama = {
-      enable = true;
-      acceleration = "cuda";
+    enable = true;
+    package = pkgs.ollama-cuda;
+  };
+
+  services.n8n = {
+    enable = true;
+    openFirewall = true;
+
+    environment = {
+      DB_TYPE = "postgresdb";
+      DB_POSTGRESDB_DATABASE = "n8n";
+      DB_POSTGRESDB_HOST = "localhost";
+      DB_POSTGRESDB_PORT = "5432";
+      DB_POSTGRESDB_USER = "n8n";
+
+      N8N_PORT = 5678;
+      N8N_HOST = "local";
+      N8N_PROTOCOL = "http";
+      WEBHOOK_URL = "http://localhost:5678";
+      N8N_DIAGNOSTICS_ENABLED = true;
+      N8N_COMMUNITY_PACKAGES_ENABLED = "true";
+    };
+  };
+
+  services.postgresql = {
+    enable = true;
+    package = pkgs.postgresql_16;
+    settings = {
+      listen_addresses = lib.mkForce "localhost";
+    };
+    enableTCPIP = true;
+    ensureDatabases = [ "n8n" ];
+    ensureUsers = [{
+      name = "n8n";
+      ensureDBOwnership = true;
+    }];
+    authentication =  pkgs.lib.mkOverride 10 ''
+      #type database DBuser origin-address auth-method
+      local all      all     trust
+      # ... other auth rules ...
+  
+      # ipv4
+      host  all      all     127.0.0.1/32   trust
+      # ipv6
+      host  all      all     ::1/128        trust
+    '';
+    initialScript = pkgs.writeText "backend-initScript" ''
+      CREATE ROLE nixcloud WITH LOGIN PASSWORD 'nixcloud' CREATEDB;
+      CREATE DATABASE nixcloud;
+      GRANT ALL PRIVILEGES ON DATABASE nixcloud TO nixcloud;
+    '';
+  };
+
+  services.caddy = {
+    enable = true;
+  };
+
+  services.tailscale = {
+    enable = true;
+    permitCertUid = "caddy";
   };
 
   # networking.firewall.allowedTCPPorts = [ ... ];
   # networking.firewall.allowedUDPPorts = [ ... ];
-  # networking.firewall.enable = false;
+  networking.firewall = {
+    enable = true;
+    trustedInterfaces = [ "tailscale0" ];
+    allowedTCPPorts = [ 5678 ];
+
+  };
 
   system.stateVersion = "25.05";
 }

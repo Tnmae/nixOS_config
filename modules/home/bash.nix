@@ -19,8 +19,8 @@
       export PATH="$PATH:$HOME/go/bin"
       export PATH="$PATH:$HOME/.local/bin"
       eval "$(starship init bash)"
+      "fastfetch"
     '';
 
   };
-
 }

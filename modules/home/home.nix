@@ -1,15 +1,15 @@
-{ config, pkgs, ... }:
+{ config, pkgs, nvf, ... }:
 
 {
   home.username = "Tnmae";
   home.homeDirectory = "/home/Tnmae";
   home.stateVersion = "25.05";
-
+  
   imports = [
     ./waybar/waybar.nix
     ./niri/niri.nix
     ./bash.nix
-    ./wofi.nix
+    ./wofi/wofi.nix
     ./tmux.nix
     ./ghostty.nix
   ];
@@ -18,6 +18,8 @@
   # 🧰 User tools and base config
   ########################################
   home.packages = with pkgs; [
+    nixpkgs-fmt
+    nil
     fastfetch
     btop
     starship
@@ -63,9 +65,13 @@
     obs-studio.plugins = [ pkgs.obs-studio-plugins.wlrobs ];
     git = {
       enable = true;
-      userName = "Tnmae";
-      userEmail = "ttyagi.2505@gmail.com";
-      extraConfig = {
+      settings = {
+        user = {
+          name = "Tnmae";
+          email = "ttyagi.2505@gmail.com";
+        };
+      };
+      settings = {
         init.defaultBranch = "main";
         pull.rebase = true;
         color.ui = "auto";
