@@ -53,12 +53,26 @@
   # 🧬 Git config
   ########################################
   programs = {
-    bash.enable = true;
+    zsh.enable = true;
     neovim = {
       enable = true;
       defaultEditor = true;
       viAlias = true;
       vimAlias = true;
+      extraPackages = with pkgs; [
+        vimPlugins.clangd_extensions-nvim
+        rust-analyzer
+        sonarlint-ls
+
+        gofumpt
+        goimports-reviser
+        golines
+
+        gopls
+
+        go
+        gcc
+      ];
     };
 
     obs-studio.enable = true;

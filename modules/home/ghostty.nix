@@ -8,5 +8,6 @@
       window-decoration = "false";
       background-blur = "20";
     };
+    enableZshIntegration = true;
   };
 }

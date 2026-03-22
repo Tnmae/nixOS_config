@@ -52,6 +52,7 @@ hardware.bluetooth = {
   };
 };
 
+  users.defaultUserShell = pkgs.zsh; 
 
   users = {
     users.Tnmae = {
@@ -65,6 +66,8 @@ hardware.bluetooth = {
         "libvirtd"
         "kvm"
       ];
+      shell = pkgs.zsh;
+      useDefaultShell = true;
       packages = with pkgs; [
         tree
       ];
@@ -82,6 +85,8 @@ hardware.bluetooth = {
   virtualisation.spiceUSBRedirection.enable = true;
   
   programs.firefox.enable = true;
+  
+  environment.shells = with pkgs; [ zsh ];
 
   environment.systemPackages = with pkgs; [
     ffmpeg
@@ -169,6 +174,7 @@ hardware.bluetooth = {
     bruno
     nasm
     v4l-utils
+    opencode
   ];
 
   hardware = {
@@ -207,7 +213,7 @@ hardware.bluetooth = {
     niri.enable = true;
     xwayland.enable = true;
     wireshark.enable = true;
-
+    zsh.enable = true;
     steam = {
       enable = true;
       remotePlay.openFirewall = true;
@@ -215,6 +221,7 @@ hardware.bluetooth = {
     };
     gamemode.enable = true;
   };
+
 
   security.polkit.enable = true;
   virtualisation.docker.enable = true;
