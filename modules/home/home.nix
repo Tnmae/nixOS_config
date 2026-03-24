@@ -1,6 +1,7 @@
-{ config, pkgs, nvf, ... }:
+{ fonfig, pkgs, ... }:
 
 {
+
   home.username = "Tnmae";
   home.homeDirectory = "/home/Tnmae";
   home.stateVersion = "25.05";
@@ -9,6 +10,7 @@
     ./waybar/waybar.nix
     ./niri/niri.nix
     ./bash.nix
+    ./nvfvim.nix
     ./wofi/wofi.nix
     ./tmux.nix
     ./ghostty.nix
@@ -72,6 +74,7 @@
 
         go
         gcc
+        opencode
       ];
     };
 
